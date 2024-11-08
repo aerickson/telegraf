@@ -19,11 +19,6 @@ import (
 	"github.com/influxdata/telegraf/plugins/serializers/influx"
 )
 
-// ExecutableInput represents inputs that run external commands
-type ExecutableInput interface {
-	Command() string
-}
-
 // Agent runs a set of plugins.
 type Agent struct {
 	Config *config.Config
