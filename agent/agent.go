@@ -601,25 +601,23 @@ func (a *Agent) gatherOnce(
 		case err := <-done:
 			return err
 		case <-slowWarning.C:
-			var details string
-			if exec, ok := input.(ExecutableInput); ok {
-				details = fmt.Sprintf(" Command: %q", exec.Command())
+			details := ""
+			if input.Config != nil {
+				details = fmt.Sprintf(" Config: %+v", input.Config)
 			}
-			log.Printf("W! [%s] Collection took longer than expected; not complete after interval of %s.%s Started at: %s",
+			log.Printf("W! [%s] Collection took longer than expected; not complete after interval of %s.%s",
 				input.LogName(),
 				interval,
-				details,
-				input.LastGatherTime().Format(time.RFC3339))
+				details)
 			input.IncrGatherTimeouts()
 		case <-ticker.Elapsed():
-			var details string
-			if exec, ok := input.(ExecutableInput); ok {
-				details = fmt.Sprintf(" Command: %q", exec.Command())
+			details := ""
+			if input.Config != nil {
+				details = fmt.Sprintf(" Config: %+v", input.Config)
 			}
-			log.Printf("D! [%s] Previous collection has not completed; scheduled collection skipped.%s Started at: %s",
+			log.Printf("D! [%s] Previous collection has not completed; scheduled collection skipped.%s",
 				input.LogName(),
-				details,
-				input.LastGatherTime().Format(time.RFC3339))
+				details)
 		}
 	}
 }
