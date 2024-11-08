@@ -10,14 +10,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/config"
+
+	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/internal"
 	"github.com/influxdata/telegraf/internal/snmp"
 	"github.com/influxdata/telegraf/models"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/influxdata/telegraf/plugins/serializers/influx"
 )
+
+// ExecutableInput represents inputs that run external commands
+type ExecutableInput interface {
+	Command() string
+}
 
 // Agent runs a set of plugins.
 type Agent struct {
@@ -595,12 +601,25 @@ func (a *Agent) gatherOnce(
 		case err := <-done:
 			return err
 		case <-slowWarning.C:
-			log.Printf("W! [%s] Collection took longer than expected; not complete after interval of %s",
-				input.LogName(), interval)
+			var details string
+			if exec, ok := input.(ExecutableInput); ok {
+				details = fmt.Sprintf(" Command: %q", exec.Command())
+			}
+			log.Printf("W! [%s] Collection took longer than expected; not complete after interval of %s.%s Started at: %s",
+				input.LogName(),
+				interval,
+				details,
+				input.LastGatherTime().Format(time.RFC3339))
 			input.IncrGatherTimeouts()
 		case <-ticker.Elapsed():
-			log.Printf("D! [%s] Previous collection has not completed; scheduled collection skipped",
-				input.LogName())
+			var details string
+			if exec, ok := input.(ExecutableInput); ok {
+				details = fmt.Sprintf(" Command: %q", exec.Command())
+			}
+			log.Printf("D! [%s] Previous collection has not completed; scheduled collection skipped.%s Started at: %s",
+				input.LogName(),
+				details,
+				input.LastGatherTime().Format(time.RFC3339))
 		}
 	}
 }

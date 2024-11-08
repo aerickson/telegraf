@@ -179,6 +179,7 @@ func (e *Exec) processCommand(command string, acc telegraf.Accumulator, wg *sync
 	if len(metrics) == 0 {
 		once.Do(func() {
 			e.Log.Debug(internal.NoMetricsCreatedMsg)
+			e.Log.Debugf("Command without metrics: %q", command)
 		})
 	}
 
