@@ -163,7 +163,13 @@ func removeWindowsCarriageReturns(b bytes.Buffer) bytes.Buffer {
 func (e *Exec) processCommand(command string, acc telegraf.Accumulator, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	start := time.Now() // Add timing
 	out, errBuf, runErr := e.runner.run(command, e.Environment, time.Duration(e.Timeout))
+	duration := time.Since(start) // Calculate duration
+
+	// Add debug logging for command execution time
+	e.Log.Debugf("Command %q took %v to run", command, duration)
+
 	if !e.IgnoreError && !e.parseDespiteError && runErr != nil {
 		err := fmt.Errorf("exec: %w for command %q: %s", runErr, command, string(errBuf))
 		acc.AddError(err)
