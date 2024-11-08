@@ -10,9 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf/config"
-
 	"github.com/influxdata/telegraf"
+	"github.com/influxdata/telegraf/config"
 	"github.com/influxdata/telegraf/internal"
 	"github.com/influxdata/telegraf/internal/snmp"
 	"github.com/influxdata/telegraf/models"
